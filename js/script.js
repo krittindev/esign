@@ -1,3 +1,30 @@
+const data = [
+  " ก",
+  " ต",
+  " ส",
+  " พ",
+  " ห",
+  " ร",
+  " ด",
+  " ฟ",
+  " ล",
+  " ย",
+  " ม",
+  " น",
+  " ง",
+  " ฉ",
+  " อ",
+  " ี",
+  " โ",
+  " ไ",
+  " ิ",
+  " ใ",
+  " 1",
+  " 2",
+  " 3",
+  " 4",
+  " 5",
+];
 // import * as tf from '@tensorflow/tfjs';
 // Our input frames will come from here.
 const videoElement = document.getElementsByClassName("input_video")[0];
@@ -16,8 +43,11 @@ spinner.ontransitionend = () => {
 };
 
 // model
+let model;
 async function run() {
-  const model = await tf.loadModel("model/model.json");
+  model = await tf.loadLayersModel(
+    "https://tuliptgr.github.io/esign/model/model.json"
+  );
 }
 
 (async () => {
@@ -40,7 +70,38 @@ document.addEventListener("keydown", function (event) {
         1 + document.getElementById("titleResult").innerText.length
       );
   }
+  if (event.code == "KeyA") {
+    // add
+    document.getElementById("titleResult").innerText +=
+      document.getElementById("charactorResult").innerText;
+  }
 });
+
+function pre_process_landmark(landmark_list) {
+  let input = [...landmark_list][0];
+
+  console.log(input);
+  // Convert to relative coordinates
+  let temp = [];
+  let base_x = 0,
+    base_y = 0;
+  for (let i = 0; i < input.length; i++) {
+    if (i == 0) {
+      base_x = input[i].x;
+      base_y = input[i].y;
+    }
+    temp.push(input[i].x - base_x);
+    temp.push(input[i].y - base_y);
+  }
+
+  console.log(temp);
+  // Normalization
+  let max_value = Math.max(...temp.map((a) => Math.abs(a)));
+  let result = [...temp.map((a) => a / max_value)];
+
+  console.log(result);
+  return result;
+}
 
 function onResults(results) {
   // Hide the spinner.
@@ -75,8 +136,15 @@ function onResults(results) {
           },
         });
     }
-    // const prediction = model.predict(results.multiHandLandmarks);
-    // document.getElementById("titleResult").innerHTML = prediction;
+    let prediction = model.predict(
+      tf.tensor(pre_process_landmark(results.multiHandLandmarks), [1, 42])
+    );
+
+    let index = prediction.argMax(-1).dataSync()[0];
+    document.getElementById("charactorResult").innerHTML = data[index];
+
+    let acc = prediction.dataSync()[prediction.argMax(-1).dataSync()[0]];
+    document.getElementById("accResult").innerHTML = acc;
   }
   canvasCtx.restore();
 }
