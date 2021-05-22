@@ -177,23 +177,23 @@ new ControlPanel(controlsElement, {
   minTrackingConfidence: 0.5,
 })
   .add([
-    new StaticText({ title: "MediaPipe Hands" }),
+    new StaticText({ title: "eSIGN" }),
     fpsControl,
     new Toggle({ title: "Selfie Mode", field: "selfieMode" }),
     new Slider({
-      title: "Max Number of Hands",
+      title: "จำนวนมือสูงสุด",
       field: "maxNumHands",
       range: [1, 4],
       step: 1,
     }),
     new Slider({
-      title: "Min Detection Confidence",
+      title: "ค่า MDC",
       field: "minDetectionConfidence",
       range: [0, 1],
       step: 0.01,
     }),
     new Slider({
-      title: "Min Tracking Confidence",
+      title: "ค่า MTC",
       field: "minTrackingConfidence",
       range: [0, 1],
       step: 0.01,
